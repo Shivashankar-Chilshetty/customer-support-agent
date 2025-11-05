@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch index.ts"
+    "dev": "bun run src/graph.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -12,6 +12,7 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@langchain/core": "^1.0.2",
     "@langchain/groq": "^1.0.0",
     "@langchain/langgraph": "^1.0.0"
   }

@@ -4,6 +4,7 @@
     "": {
       "name": "customer-support-agent",
       "dependencies": {
+        "@langchain/core": "^1.0.2",
         "@langchain/groq": "^1.0.0",
         "@langchain/langgraph": "^1.0.0",
       },
@@ -18,7 +19,7 @@
   "packages": {
     "@cfworker/json-schema": ["@cfworker/json-schema@4.1.1", "", {}, "sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og=="],
 
-    "@langchain/core": ["@langchain/core@1.0.1", "", { "dependencies": { "@cfworker/json-schema": "^4.0.2", "ansi-styles": "^5.0.0", "camelcase": "6", "decamelize": "1.2.0", "js-tiktoken": "^1.0.12", "langsmith": "^0.3.64", "mustache": "^4.2.0", "p-queue": "^6.6.2", "p-retry": "4", "uuid": "^10.0.0", "zod": "^3.25.76 || ^4" } }, "sha512-hVM3EkojYOk4ISJQKjLuWYSH6kyyOFlZIrLFETDA1L0Z2/Iu0q32aJawZ0FDn6rlXE8QZjBt/9OaOL36rXc05w=="],
+    "@langchain/core": ["@langchain/core@1.0.2", "", { "dependencies": { "@cfworker/json-schema": "^4.0.2", "ansi-styles": "^5.0.0", "camelcase": "6", "decamelize": "1.2.0", "js-tiktoken": "^1.0.12", "langsmith": "^0.3.64", "mustache": "^4.2.0", "p-queue": "^6.6.2", "p-retry": "4", "uuid": "^10.0.0", "zod": "^3.25.76 || ^4" } }, "sha512-6mOn4bZyO6XT0GGrEijRtMVrmYJGZ8y1BcwyTPDptFz38lP0CEzrKEYB++h+u3TEcAd3eO25l1aGw/zVlVgw2Q=="],
 
     "@langchain/groq": ["@langchain/groq@1.0.0", "", { "dependencies": { "groq-sdk": "^0.19.0" }, "peerDependencies": { "@langchain/core": "^1.0.0" } }, "sha512-6fG9MEQHNXnxgObFHSPh+BPYyTGcoDnKd+GhI9l96cpHh+QNI+IvypicRCZVSsLdqzRCFHISvBQaH+SP5vgjIw=="],
 
