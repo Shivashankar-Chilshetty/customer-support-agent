@@ -62,7 +62,7 @@ async function frontDeskSupport(state: typeof StateAnnotation.State) {
 
 async function marketingSupport(state: typeof StateAnnotation.State) {
     //logic for marketing support
-    //bind marketing tools to the model
+    //bind marketing tools to the generic model
     const llmWithTools = model.bindTools(marketingTools);
 
     const SYSTEM_PROMPT = `You are part of the Marketing Team at Coder's Gyan, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
@@ -72,7 +72,9 @@ async function marketingSupport(state: typeof StateAnnotation.State) {
     console.log('Handling by marketing team...')
 
     let trimmedHistory = state.messages; // Get all the message history from state
-    // If last message is from AI, remove it
+    // If last message is from AI, remove it, i,e when the user asks "Are there any discounts on the course?"
+    //→ this will be message 1, agent responds → "Wait i will redirect you to marketing agent", this is message 2, 
+    //so here we can directly send the user message 1 to the marketing support agent/LLM & trim/remove the message 2. 
     if (trimmedHistory.at(-1)?.getType() === 'ai') {
         trimmedHistory = trimmedHistory.slice(0, -1); // [1, 2, 3] -> [1, 2]
     }
@@ -108,7 +110,7 @@ function whoIsNextRepresentative(state: typeof StateAnnotation.State) {
     }
 }
 
-//check if last message has tool calls(i,e check if ai used a tool)
+//check if last message has tool calls(i,e check if ai used a tool), if yes then call that tool node
 function isMarketingTool(state: typeof StateAnnotation.State) {
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
 
@@ -126,8 +128,7 @@ const graph = new StateGraph(StateAnnotation)
     .addNode('marketingTools', marketingToolNode)
     .addEdge('__start__', 'frontDeskSupport')
     .addEdge('marketingTools', 'marketingSupport')
-    .addEdge('marketingSupport', 'marketingSupport')
-    .addEdge('learningSupport', 'learningSupport')
+    //.addEdge('learningSupport', 'learningSupport')
     .addConditionalEdges('frontDeskSupport', whoIsNextRepresentative, {
         marketingSupport: 'marketingSupport',
         learningSupport: 'learningSupport',
