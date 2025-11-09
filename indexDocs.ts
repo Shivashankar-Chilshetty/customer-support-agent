@@ -51,6 +51,6 @@ export async function indexTheDocument(filePath: string) {
   await vectorStore.addDocuments(documents);
 }
 
-indexTheDocument("./cg-knowledge-base.pdf")
+//indexTheDocument("./cg-knowledge-base.pdf")
 
 console.log('Done')

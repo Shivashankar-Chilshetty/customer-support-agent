@@ -1,4 +1,6 @@
 import { tool } from '@langchain/core/tools';
+import { createRetrieverTool } from 'langchain/tools/retriever';
+import { vectorStore } from '../indexDocs';
 
 export const getOffers = tool(
     () => {
@@ -20,3 +22,10 @@ export const getOffers = tool(
     },
 );
 
+// Retrieval tool for fetching data from vector db
+const retriever = vectorStore.asRetriever();
+
+export const kbRetrieverTool = createRetrieverTool(retriever, {
+    name: 'retrieve_learning_knowledge_base',
+    description: 'Search and return information about syllabus, courses, FAQs, career doubts.',
+});

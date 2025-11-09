@@ -2,12 +2,16 @@ import { END, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StateAnnotation } from "./state";
 import { model } from "./model";
-import { getOffers } from "./tools";
+import { getOffers, kbRetrieverTool } from "./tools";
 import type { AIMessage } from '@langchain/core/messages';
 
-
+//Marketing tool
 const marketingTools = [getOffers];
 const marketingToolNode = new ToolNode(marketingTools);
+
+//Learning tool
+const learningTools = [kbRetrieverTool]; //vector db retrieval tool
+const learningToolNode = new ToolNode(learningTools);
 
 async function frontDeskSupport(state: typeof StateAnnotation.State) {
     const SYSTEM_PROMPT = `You are frontline support staff for Namaste-DEV, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
@@ -92,10 +96,33 @@ async function marketingSupport(state: typeof StateAnnotation.State) {
     }
 }
 
-function learningSupport(state: typeof StateAnnotation.State) {
+async function learningSupport(state: typeof StateAnnotation.State) {
     //logic for learning support
-    console.log('Handling by learning support team...')
-    return state;
+    const SYSTEM_PROMPT = `You are part of the Learning Support Team at Coder's Gyan, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
+        You assist students with questions about available courses, syllabus coverage, learning paths, and study strategies.
+        Keep your answers concise, clear, and supportive. Strictly use information from retrived context for answering queries. If the query is about learning issues, politely redirect the student to the respective team.
+        Important: Call retrieve_learning_knowledge_base max 3 times if the tool result is not relevant to original query.`;
+
+    //trimming frontdesk message
+    let trimmedHistory = state.messages;
+
+    if (trimmedHistory.at(-1)?.getType() === 'ai') {
+        trimmedHistory = trimmedHistory.slice(0, -1); // [1, 2, 3] -> [1, 2]
+    }
+
+    const llmWithTools = model.bindTools(learningTools); //attach retrieval tool, which will retrieve data from vector db
+
+    const learningResponse = await llmWithTools.invoke([
+        {
+            role: 'system',
+            content: SYSTEM_PROMPT,
+        },
+        ...trimmedHistory,
+    ]);
+
+    return {
+        messages: [learningResponse],
+    };
 }
 
 function whoIsNextRepresentative(state: typeof StateAnnotation.State) {
@@ -121,14 +148,25 @@ function isMarketingTool(state: typeof StateAnnotation.State) {
     return '__end__';
 }
 
+function isLearningTool(state: typeof StateAnnotation.State) {
+    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
+
+    if (lastMessage.tool_calls?.length) {
+        return 'learningTools';
+    }
+
+    return '__end__';
+}
+
 const graph = new StateGraph(StateAnnotation)
     .addNode('frontDeskSupport', frontDeskSupport)
     .addNode('marketingSupport', marketingSupport)
     .addNode('learningSupport', learningSupport)
     .addNode('marketingTools', marketingToolNode)
+    .addNode('learningTools', learningToolNode)	
     .addEdge('__start__', 'frontDeskSupport')
     .addEdge('marketingTools', 'marketingSupport')
-    //.addEdge('learningSupport', 'learningSupport')
+    .addEdge('learningTools', 'learningSupport')
     .addConditionalEdges('frontDeskSupport', whoIsNextRepresentative, {
         marketingSupport: 'marketingSupport',
         learningSupport: 'learningSupport',
@@ -136,6 +174,10 @@ const graph = new StateGraph(StateAnnotation)
     })
     .addConditionalEdges('marketingSupport', isMarketingTool, {
         marketingTools: 'marketingTools',
+        __end__: END,
+    })
+    .addConditionalEdges('learningSupport', isLearningTool, {
+        learningTools: 'learningTools',
         __end__: END,
     })
 
@@ -146,7 +188,7 @@ const app = graph.compile();
 async function main() {
     const stream = await app.stream({
         messages: [
-            { role: "user", content: "can i get any discount code?" }
+            { role: "user", content: "Which langualge gen-ai course is in?" }
         ]
     });
     for await (const value of stream) {
