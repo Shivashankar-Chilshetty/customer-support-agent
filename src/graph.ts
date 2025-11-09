@@ -10,8 +10,9 @@ const marketingTools = [getOffers];
 const marketingToolNode = new ToolNode(marketingTools);
 
 //Learning tool
-const learningTools = [kbRetrieverTool]; //vector db retrieval tool
-const learningToolNode = new ToolNode(learningTools);
+// Ensure kbRetrieverTool is wrapped or adjusted to match the expected type
+const learningTools = [kbRetrieverTool as any]; //vector db retrieval tool
+const learningToolNode = new ToolNode(learningTools as any);
 
 async function frontDeskSupport(state: typeof StateAnnotation.State) {
     const SYSTEM_PROMPT = `You are frontline support staff for Namaste-DEV, an ed-tech company that helps software developers excel in their careers through practical web development and Generative AI courses.
