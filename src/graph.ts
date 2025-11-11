@@ -1,3 +1,4 @@
+import readline from "node:readline/promises";
 import { END, StateGraph, MemorySaver } from "@langchain/langgraph";
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StateAnnotation } from "./state";
@@ -187,18 +188,21 @@ const app = graph.compile({ checkpointer: new MemorySaver() });
 
 //invoke graph
 async function main() {
-    const stream = await app.stream({
-        messages: [
-            { role: "user", content: "Which langualge gen-ai course is in?" }
-        ]
-    }, { configurable: { thread_id: "1" } }
-    );
-    for await (const value of stream) {
-        console.log('---STEP---');
-        console.log(value);
-        console.log('---STEP---');
-
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+    while (true) {
+        const query = await rl.question("You: ");
+        if(query === "/bye") break;
+        const state = await app.invoke(
+            {
+                messages: [
+                    { role: "user", content: query }
+                ]
+            },
+            { configurable: { thread_id: "1" } }
+        );
+        console.log("Assistant: ", state?.messages[state?.messages.length - 1]?.content ?? "No response available");
     }
+    rl.close();
 }
 
 main();
