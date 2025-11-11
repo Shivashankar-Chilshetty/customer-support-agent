@@ -1,4 +1,4 @@
-import { END, StateGraph } from "@langchain/langgraph";
+import { END, StateGraph, MemorySaver } from "@langchain/langgraph";
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { StateAnnotation } from "./state";
 import { model } from "./model";
@@ -164,7 +164,7 @@ const graph = new StateGraph(StateAnnotation)
     .addNode('marketingSupport', marketingSupport)
     .addNode('learningSupport', learningSupport)
     .addNode('marketingTools', marketingToolNode)
-    .addNode('learningTools', learningToolNode)	
+    .addNode('learningTools', learningToolNode)
     .addEdge('__start__', 'frontDeskSupport')
     .addEdge('marketingTools', 'marketingSupport')
     .addEdge('learningTools', 'learningSupport')
@@ -183,7 +183,7 @@ const graph = new StateGraph(StateAnnotation)
     })
 
 
-const app = graph.compile();
+const app = graph.compile({ checkpointer: new MemorySaver() });
 
 //invoke graph
 async function main() {
@@ -191,7 +191,8 @@ async function main() {
         messages: [
             { role: "user", content: "Which langualge gen-ai course is in?" }
         ]
-    });
+    }, { configurable: { thread_id: "1" } }
+    );
     for await (const value of stream) {
         console.log('---STEP---');
         console.log(value);
